@@ -59,16 +59,87 @@ ggplot(user1_walking_total,aes(x=time,y=maguserAcceleration))+geom_line()+facet_
 #total_data_eject
 HAR_total=data.frame()
 
-for (f in user_walking) {
+for (f in fls) {
   temp=get(f)
-  HAR_total<-rbind(HAR_total,temp %>% mutate(exp_no=unlist(regmatches(f,gregexpr("[[:digit:]]+",f)[1]))[1],id=unlist(regmatches(f,gregexpr("[[:digit:]]+",f)[1]))[2],activity=unlist(str_split(f,"\\_"))[1]))
+  HAR_total<-rbind(HAR_total,(temp %>% mutate(exp_no=unlist(regmatches(f,gregexpr("[[:digit:]]+",f)[1]))[1],id=unlist(regmatches(f,gregexpr("[[:digit:]]+",f)[1]))[2],activity=unlist(str_split(f,"\\_"))[1])))
 }
 
-head(HAR_total,n=100)
+HAR_total
+summary(as.factor(HAR_total$activity))
 
 #magnitude of V",cycle 
 HAR_total=mag(HAR_total,"userAcceleration")
 HAR_total=mag(HAR_total,"rotationRate")
 head(HAR_total,n=100)
+HAR_total #total 1403228 rows
 
-save.image("HAR_total.Rdata")
+save.image("HAR_total.RData")
+load("HAR_total.RData")
+
+#install.packages("moments")
+library(moments);library(tidyverse) #moments for skewness()
+HAR_summary=HAR_total %>% group_by(id, exp_no, activity) %>% summarise_at(.vars=c("maguserAcceleration","magrotationRate"),.funs = c(mean,min,max,sd,skewness))
+HAR_summary
+
+
+#jog_data_visualization
+library(dplyr)
+library(stringr)
+fls
+user1=fls[str_detect(fls,"sub_1\\.")]
+length(user1)
+user_jogging=user1[str_detect(user1,"jog")]
+user_jogging
+
+
+##sample_data_eject
+user1_jogging_total=data.frame()
+
+for (f in user_walking) {
+  temp=get(f)
+  user1_jogging_total<-rbind(user1_jogging_total,temp %>% mutate(exp_no=unlist(regmatches(f,gregexpr("[[:digit:]]+",f)[1]))[1],id=unlist(regmatches(f,gregexpr("[[:digit:]]+",f)[1]))[2]))
+}
+user1_jogging_total=user1_jogging_total[2:length(user1_jogging_total)]
+user1_jogging_total
+
+#making_magnitude_data_column
+user1_jogging_total=mag(user1_jogging_total,"userAcceleration")
+user1_jogging_total
+
+#sample_data_visualization
+user1_jogging_total=user1_jogging_total %>% group_by(exp_no) %>% mutate(time=row_number()) %>% ungroup()
+
+library(ggplot2)
+windows()
+ggplot(user1_jogging_total,aes(x=time,y=maguserAcceleration))+geom_line()+facet_wrap(.~exp_no,nrow=3)
+
+#-------------------(행동분류모델)-----------------------------
+#install.packages("RWeka") #you need jdk_ver>=8.0 (I use 11.0.9)
+library(RWeka) #https://cran.r-project.org/web/packages/RWeka/index.html
+RF=make_Weka_classifier("weka/classifiers/trees/RandomForest") #this is using for calling function
+RF
+Bayes_net=make_Weka_classifier("weka/classifiers/bayes/BayesNet")
+Bayes_net
+J48=make_Weka_classifier("weka/classifiers/trees/RandomForest")
+J48
+save.image("HAR_03.Rdata")
+load("HAR_03.Rdata")
+
+library(dplyr);library(stringr)
+HAR_summary$activity=as.factor(HAR_summary$activity)
+activity=HAR_summary %>% ungroup() %>% select(c(colnames(HAR_summary)[str_detect(colnames(HAR_summary),"mag")], "activity"))
+
+str_detect(colnames(HAR_summary),'mag')
+
+c(colnames(HAR_summary)[FALSE,FALSE,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE])
+
+m=J48(activity~.,data=activity)
+e=evaluate_Weka_classifier(m,numFolds=10,complexity = T,class=T)
+e
+
+r=RF(activity~.,data=activity)
+e=evaluate_Weka_classifier(m,numFolds=10,complexity = T,class=T)
+e
+
+save.image("HAR_04.Rdata")
+load("HAR_04.Rdata")
