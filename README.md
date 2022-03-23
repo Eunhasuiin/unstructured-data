@@ -1,6 +1,10 @@
 # unstructured-data
 To make record of lecture
 
+
+Encode EUC-KR
+
+
 data_file in 
 
 https://github.com/mmalekzadeh/motion-sense/blob/master/data/A_DeviceMotion_data.zip
