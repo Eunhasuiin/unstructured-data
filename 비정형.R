@@ -64,7 +64,7 @@ for (f in fls) {
   HAR_total<-rbind(HAR_total,(temp %>% mutate(exp_no=unlist(regmatches(f,gregexpr("[[:digit:]]+",f)[1]))[1],id=unlist(regmatches(f,gregexpr("[[:digit:]]+",f)[1]))[2],activity=unlist(str_split(f,"\\_"))[1])))
 }
 
-HAR_total
+HAR_total %>% group_by(activity) %>% summarise(n=n())
 summary(as.factor(HAR_total$activity))
 
 #magnitude of V",cycle 
@@ -141,7 +141,7 @@ r=RF(activity~.,data=activity)
 e=evaluate_Weka_classifier(m,numFolds=10,complexity = T,class=T)
 e
 
-setwd("C:/Users/student/Desktop/unstructured-data-main")
+setwd("C:\Users\sherm\Desktop\unstructed_data")
 save.image("HAR_04.Rdata")
 load("HAR_04.Rdata")
 
@@ -174,7 +174,7 @@ prod(nile_river)^(1/n) #geometric mean
 
 
 #왜도 활용 
-install.packages("fBasics")
+#install.packages("fBasics")
 library(fBasics);library(ggplot2)
 str(diamonds)
 skewness(diamonds$price)
@@ -186,14 +186,13 @@ ggplot(diamonds,aes(x=price))+geom_histogram()+facet_grid(color~.) #It is two wa
 with(diamonds,tapply(price,color,skewness))
 with(diamonds,tapply(price,color,kurtosis))
 
-install.packages("pracma")
-install.packages("signal")
-install.packages("e1071")
-library(pracma);library(e1071);library(signal);library(signal);library(dplyr)
+#install.packages("pracma")
+#install.packages("signal")
+#install.packages("e1071")
+library(pracma);library(e1071);library(signal);library(signal);library(dplyr);library(RWeka)
 
 rss=function(x) rms(x)*(length(x))^0.5
 HAR_summary_extend= HAR_total %>% group_by(id, exp_no, activity) %>% summarize_at(.vars = c("maguserAcceleration","magrotationRate"),.funs = c(mean, min, max, sd, skewness, rms, rss ,IQR, e1071::kurtosis))
-?IQR
 sapply(HAR_summary_extend,class)
 length(HAR_summary_extend)
 
@@ -202,8 +201,10 @@ HAR_summary_extend2
 
 library(RWeka)
 m2=J48(as.factor(activity)~.,data=HAR_summary_extend2)
-e2=evaluate_Weka_classifier(m,numFolds = 10,complexity = T,class = TRUE)
+m2
+e2=evaluate_Weka_classifier(m2,numFolds = 10,complexity = T,class = TRUE)
 e2
 
+setwd("C:/Users/sherm/Desktop/unstructed_data")
 save.image("HAR_05.Rdata")
 load("HAR_05.Rdata")
