@@ -141,5 +141,69 @@ r=RF(activity~.,data=activity)
 e=evaluate_Weka_classifier(m,numFolds=10,complexity = T,class=T)
 e
 
+setwd("C:/Users/student/Desktop/unstructured-data-main")
 save.image("HAR_04.Rdata")
 load("HAR_04.Rdata")
+
+#-------------------(기술통계량)----------------------------
+alpha=sample(1:10,10)
+m=cummax(alpha)
+m
+
+#install.packages("seewave")
+library(seewave)
+t=seq(0,1,0.01)
+x=cos(2*pi*t)
+plot(t,x,"l")
+y=rms(x) #rms is Root mean square 제곱평균제곱근 ref) https://m.blog.naver.com/pkw00/220226903866
+
+
+#나일강의 유량 파악
+nile_river=Nile
+windows()
+plot(nile_river)
+hist(nile_river)
+
+##대푯값 추출
+n=length(nile_river)
+mean(nile_river)
+median(nile_river)
+which.max(nile_river) #Find mode(최빈값)
+prod(nile_river)^(1/n) #geometric mean
+1/mean(1/nile_river) #harmonic mean -> It is same F1 score
+
+
+#왜도 활용 
+install.packages("fBasics")
+library(fBasics);library(ggplot2)
+str(diamonds)
+skewness(diamonds$price)
+
+ggplot(diamonds,aes(x=price))+geom_histogram()+facet_grid(color~.) #It is two way to show many graph
+
+
+##분포 형태와 대칭정도
+with(diamonds,tapply(price,color,skewness))
+with(diamonds,tapply(price,color,kurtosis))
+
+install.packages("pracma")
+install.packages("signal")
+install.packages("e1071")
+library(pracma);library(e1071);library(signal);library(signal);library(dplyr)
+
+rss=function(x) rms(x)*(length(x))^0.5
+HAR_summary_extend= HAR_total %>% group_by(id, exp_no, activity) %>% summarize_at(.vars = c("maguserAcceleration","magrotationRate"),.funs = c(mean, min, max, sd, skewness, rms, rss ,IQR, e1071::kurtosis))
+?IQR
+sapply(HAR_summary_extend,class)
+length(HAR_summary_extend)
+
+HAR_summary_extend2=HAR_summary_extend %>% ungroup() %>% select(-c("id","exp_no"))
+HAR_summary_extend2
+
+library(RWeka)
+m2=J48(as.factor(activity)~.,data=HAR_summary_extend2)
+e2=evaluate_Weka_classifier(m,numFolds = 10,complexity = T,class = TRUE)
+e2
+
+save.image("HAR_05.Rdata")
+load("HAR_05.Rdata")
