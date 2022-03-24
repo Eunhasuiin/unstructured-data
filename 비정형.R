@@ -205,6 +205,25 @@ m2
 e2=evaluate_Weka_classifier(m2,numFolds = 10,complexity = T,class = TRUE)
 e2
 
-setwd("C:/Users/sherm/Desktop/unstructed_data")
+setwd("C:/Users/student/Desktop/unstructured-data-main")
 save.image("HAR_05.Rdata")
 load("HAR_05.Rdata")
+
+#PCA
+mtcars.pca=prcomp(HAR_summary_extend2 %>% ungroup %>% select(-activity),center = TRUE, scale. = TRUE)
+mtcars.pca
+
+plot(mtcars.pca$sdev)+title("Screeplot")
+
+m3=J48(as.factor(activity)~.,data=HAR_summary_extend2 %>% select(1,2,11,12,14,15))
+e3=evaluate_Weka_classifier(m3,numFolds = 10,complexity = TRUE,class = TRUE)
+e3
+
+#-------------------(peak)------------------
+#install.package("pracma")
+library(pracma)
+x=seq(0,1,len=1024)
+pos=c(0.1,0.13,0.15,0.23,0.25,0.4,0.44,0.65,0.76,0.78,0.81)
+hgt=c(4,5,3,4,5,4.2,2.1,4.3,2.1,3.1,5.1,4.2)
+wdt=c(0.005,0.005,0.006,0.011,0.01,0.03,0.01,0.01,0.005,0.008,0.005)
+pSignal
