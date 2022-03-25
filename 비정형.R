@@ -205,7 +205,7 @@ m2
 e2=evaluate_Weka_classifier(m2,numFolds = 10,complexity = T,class = TRUE)
 e2
 
-setwd("C:/Users/student/Desktop/unstructured-data-main")
+setwd("C:/Users/sherm/Desktop/unstructed_data")
 save.image("HAR_05.Rdata")
 load("HAR_05.Rdata")
 
@@ -226,4 +226,14 @@ x=seq(0,1,len=1024)
 pos=c(0.1,0.13,0.15,0.23,0.25,0.4,0.44,0.65,0.76,0.78,0.81)
 hgt=c(4,5,3,4,5,4.2,2.1,4.3,2.1,3.1,5.1,4.2)
 wdt=c(0.005,0.005,0.006,0.011,0.01,0.03,0.01,0.01,0.005,0.008,0.005)
-pSignal
+pSignal=numeric(length(x))
+for (i in seq(along=pos)) {
+  pSignal=pSignal+hgt[i]/(1+abs((x-pos[i])/wdt[i]))^4
+}
+plot(pSignal,type="l",col='navy')
+
+x=findpeaks(pSignal,npeaks = 3,threshold = 4, sortstr = T)
+points(x[,2],x[,1],pch=20,col="maroon")
+
+save.image("HAR_06.Rdata")
+load("HAR_06.Rdata")
