@@ -63,7 +63,7 @@ for (f in fls) {
   temp=get(f)
   HAR_total<-rbind(HAR_total,(temp %>% mutate(exp_no=unlist(regmatches(f,gregexpr("[[:digit:]]+",f)[1]))[1],id=unlist(regmatches(f,gregexpr("[[:digit:]]+",f)[1]))[2],activity=unlist(str_split(f,"\\_"))[1])))
 }
-
+HAR_total
 HAR_total %>% group_by(activity) %>% summarise(n=n())
 summary(as.factor(HAR_total$activity))
 
@@ -235,5 +235,74 @@ plot(pSignal,type="l",col='navy')
 x=findpeaks(pSignal,npeaks = 3,threshold = 4, sortstr = T)
 points(x[,2],x[,1],pch=20,col="maroon")
 
+
+#setwd("C:/Users/student/Desktop/unstructured-data-main")
 save.image("HAR_06.Rdata")
 load("HAR_06.Rdata")
+
+library(stringr)
+mag=function(df,column) {
+  df[,str_c("mag",column)]=with(df,sqrt(get(str_c(column,".x"))^2+get(str_c(column,".y"))^2+get(str_c(column,".z"))^2))
+  return(df)
+}
+
+for(d in fls) {
+  f=get(d)
+  f=mag(f, "rotationRate")
+  f=mag(f,"userAcceleration")
+  assign(d,f)
+}
+f
+
+library(pracma)
+Peak_rslt=data.frame()
+
+for (d in fls) {
+  f=get(d)
+  p=findpeaks(f$magrotationRate,threshold=4)
+  Peak_rslt=rbind(Peak_rslt,data.frame(d, 
+                                       f_n=ifelse(!is.null(p),dim(p)[1],0),
+                                       p_intercal=ifelse(!is.null(p),ifelse(dim(p)[1]>1,mean(diff(sort(p[,2]))),0),0),
+                                       p_intercal_std=ifelse(!is.null(p),ifelse(dim(p)[1]>2,std(diff(sort(p[,2]))),0),0),
+                                       p_mean=ifelse(!is.null(p),mean(p[,1]),0),
+                                       p_max=ifelse(!is.null(p),max(p[,1]),0),
+                                       p_min=ifelse(!is.null(p),min(p[,1]),0),
+                                       p_std=ifelse(!is.null(p),ifelse(length(p[,1])==1,0,std(p[,1])),0)#,
+                                       #activity=unlist(str_split(f$d,"\\_"))[1]
+                                       ))
+}
+print(Peak_rslt)
+summary(Peak_rslt)
+Peak_rslt
+Peak_rslt
+
+
+library(dplyr)
+
+
+Peak_rslt %>% group_by(d) %>% summarise(mean(f_n))
+
+
+temp=get(fls[1])
+plot(temp$magrotationRate)
+plot(1:length(temp$magrotationRate),temp$magrotationRate,"l")
+
+p_temp=findpeaks(temp$magrotationRate,threshold = 5)
+points(p_temp[,2],p_temp[,1])
+
+library(seewave)
+temp=data.frame()
+
+for (d in fls) {
+  f=get(d)
+  f=f %>% select(magrotationRate,maguserAcceleration)
+  cfR=crest(f$magrotationRate,50,plot=T)
+  cfA=crest(f$maguserAcceleration,50,plot=T)
+  temp=rbind(temp,data.frame(d,cfR$C,cfA$C))
+}
+
+
+
+
+save.image("HAR_07.Rdata")
+load("HAR_07.Rdata")
