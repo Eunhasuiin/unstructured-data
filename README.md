@@ -20,3 +20,5 @@ https://github.com/mmalekzadeh/motion-sense/blob/master/data/A_DeviceMotion_data
 3.23 https://drive.google.com/file/d/1RY4yar-2nSdOzEidQzg8h14DjLzEm4y9/view?usp=sharing
 
 3.24 https://drive.google.com/file/d/1uywx7yhrDC1bFPQ7KfmwJi0mXJdTWmw7/view?usp=sharing
+
+3.30 https://drive.google.com/file/d/1r1xwUG-jGKb-j_9jw2JlDTKt-gppoC3S/view?usp=sharing
